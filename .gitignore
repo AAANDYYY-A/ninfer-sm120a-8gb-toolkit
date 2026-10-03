@@ -1,0 +1,12 @@
+# third-party artifacts -- never commit these
+engine/
+models/
+*.ninfer
+*.exe
+*.dll
+*.zip
+# runtime noise
+logs/
+agent-work/
+agent-run.jsonl
+*demo*.log
