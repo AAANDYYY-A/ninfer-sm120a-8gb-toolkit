@@ -237,4 +237,46 @@ curl.exe -sS -H "Content-Type: application/json" --data-binary "@$env:TEMP\tc.js
 工具轮当失败"纠正"掉）。
 
 ---
-*本说明由部署 agent 生成，所有读数均为本机实测；`ninfer-chat.py` / `chat-web.bat` / `agent\*` 为新增文件，包内原文件零改动。*
+*本说明由部署 agent 生成，所有读数均为本机实测；`ninfer-chat.py` / `chat-web.bat` / `agent\*` / `usage*` 为新增文件，包内原文件零改动。*
+
+---
+
+## 八、查看 API 调用量（用量看板）
+
+双击 **`usage.bat`** → 浏览器打开 **http://127.0.0.1:8098/**（看板本身只占一个进程；关掉它的窗口不影响引擎）。
+它**不猜、不估算**：数字全部来自引擎自己的两类机器可读输出。
+
+### 数据来源（由 `start-ptq1-mtp-lan.bat` 开启）
+
+| 来源 | 由哪个参数产生 | 内容 |
+|---|---|---|
+| `logs\requests.jsonl` | `--request-log-jsonl` | **每条请求一条全精度记录**：`result`（输入/输出/实际 prefill/前缀缓存命中 token、finish_reason、工具调用数）、`timings_seconds`（ttft / prefill / decode / total）、`speculative`（MTP 草稿数与接受数）、`server_start`（硬件与配置快照） |
+| `http://127.0.0.1:8099` | `--stats-port 8099` | `/v1/load` 实时负载（KV 页占用、运行/排队、uptime）、`/metrics` Prometheus 累计计数、`/stats`、`/health`（**同样受 API key 保护**，无密钥返回 401） |
+
+### 页面上有什么
+
+- **八张大卡**：总请求数 · 输入 token（含缓存命中）· 输出 token（含实际 prefill）· 平均与最近 TTFT · 平均与最近 decode tok/s · 平均 prefill tok/s · 投机接受率 · 工具调用数
+- **两张柱状图**：最近 24 小时「每小时请求数」与「每小时 token 数（蓝=输入 绿=输出）」
+- **实时负载面板**：运行中/排队、已准入/峰值、设备 KV 页占用（x/y 页、token 数）、主机 KV 已用、已解码与已 prefill 计数、启动时长
+- **累计计数面板**：`nimfer:requests_total`、`llamacpp:prompt_tokens_total`、`tokens_predicted_total`、`kv_cache_usage_ratio`、`ninfer:prefix_cache_hit_tokens_total` 等 10 项
+- **最近请求明细表**：时间、#、协议、是否流式、输入/输出 token、缓存命中、TTFT、prefill tok/s、decode tok/s、投机（接受/草稿）、结束原因、工具调用
+
+每 5 秒自动刷新；页面无任何外部依赖（图表是内联 SVG 画的）。
+
+### 本机首次实测读数（4 条请求）
+
+```
+请求数 4 · 输入 81 token · 输出 108 token · 实际 prefill 71 · 前缀缓存命中 10
+平均 TTFT 0.307 s · 平均 decode 53.9 tok/s · 平均 prefill 64 tok/s
+投机解码 草稿 96 / 接受 84 = 87.5%（MTP，draft-tokens 4）
+```
+
+### 注意
+
+1. 看板读的是**日志文件 + 统计口**，所以引擎必须是用 `start-ptq1-mtp-lan.bat` 起的（它带了那两个参数）；
+   若你用的是 `start-ptq1-mtp-8gb.bat`，则没有 `logs\requests.jsonl`，看板会提示日志不存在。
+2. 日志会一直增长：需要时用 `--request-log-max-mib`（引擎参数）做轮转，或直接删掉旧文件
+   （看板检测到文件变小会自动从头重读）。
+3. 统计口 `8099` 也绑在 `0.0.0.0`（与引擎同一进程），**它同样需要 API key**；不要把 8099 单独暴露出去。
+4. 本机实测：加上 `--stats-port` 与请求日志后，显存占用没有增加（引擎仍是 7.6 GiB 级），启动 4 s。
+

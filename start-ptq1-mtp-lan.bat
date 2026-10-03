@@ -47,6 +47,12 @@ if not defined KEY (
 )
 
 set "MODEL=%ROOT%models\bonsai2_27b_ternary_ptq1_native_mtp.ninfer"
+
+REM ---- usage accounting: a stats port and a structured request log ----
+set "LOGDIR=%ROOT%logs"
+if not exist "%LOGDIR%" mkdir "%LOGDIR%" >NUL 2>NUL
+set "STATSPORT=8099"
+set "REQLOG=%LOGDIR%\requests.jsonl"
 if not exist "%MODEL%" (
   echo REFUSE: model not found: "%MODEL%"
   pause
@@ -85,11 +91,17 @@ echo    Model     qwen3.8-27b
 echo.
 echo  REMINDERS: no TLS - trusted LAN only; never port-forward this port;
 echo  local clients need the same key via  set NINFER_API_KEY=...
+echo.
+echo  usage accounting:
+echo    stats/metrics : http://127.0.0.1:%STATSPORT%/metrics  (also /stats, /health, /v1/load)
+echo    request log   : %REQLOG%
+echo    dashboard     : double-click usage.bat  ->  http://127.0.0.1:8098/
 echo ============================================================
 echo.
 
 "%ROOT%engine\ninfer-serve-120a.exe" "%MODEL%" ^
   --host 0.0.0.0 --port 8095 --model-id qwen3.8-27b --api-key "%KEY%" ^
+  --stats-port %STATSPORT% --request-log-jsonl "%REQLOG%" ^
   --max-context 262144 --kv-capacity 8192 --kv-dtype k8v4 --host-kv-mib 16384 ^
   --prefill-chunk 1024 --spec mtp --draft-tokens 4 --no-cuda-graph ^
   --default-max-tokens 4096 --default-reasoning-effort none --max-concurrency 1 ^
