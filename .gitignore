@@ -1,0 +1,14 @@
+# third-party artifacts -- never commit these
+engine/
+models/
+*.ninfer
+*.exe
+*.dll
+*.zip
+# secrets -- the LAN api key lives in api-key.txt
+api-key.txt
+# runtime noise
+logs/
+agent-work/
+agent-run.jsonl
+*demo*.log
