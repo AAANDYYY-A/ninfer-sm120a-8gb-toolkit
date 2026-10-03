@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>蜻蜓闹钟</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{min-height:100vh;display:flex;justify-content:center;align-items:center;background:radial-gradient(circle at 50% 30%,#1a2538 0%,#0d1220 55%,#060910 100%);font-family:"PingFang SC","Hiragino Sans","Microsoft YaHei",sans-serif;color:#cfd8e3;padding:24px}
+.app{width:100%;max-width:560px}
+.hint{text-align:center;font-size:12px;color:#6a7a8e;margin-bottom:22px;letter-spacing:1px}
+.hint kbd{display:inline-block;padding:2px 7px;border:1px solid #33415a;border-radius:4px;font-size:11px;color:#93a5bc;background:#161f30;margin:0 3px}
+.top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:26px;flex-wrap:wrap;gap:16px}
+.clock{display:flex;flex-direction:column;gap:4px}
+.date{font-size:13px;color:#7a8a9e;letter-spacing:2px}
+.time{font-size:56px;font-weight:200;font-variant-numeric:tabular-nums;letter-spacing:3px;color:#eaf0fa;text-shadow:0 0 24px rgba(120,180,255,.25);line-height:1.05}
+.alarm-list{display:flex;flex-direction:column;gap:10px;min-height:150px}
+.alarm-list h2{font-size:13px;font-weight:500;color:#7a8a9e;letter-spacing:2px}
+.alarm-item{display:flex;justify-content:space-between;align-items:center;background:#151e30;border:1px solid #26334c;border-radius:10px;padding:12px 14px}
+.alarm-item .label{font-size:15px;color:#aebdd1}
+.alarm-item .time{font-size:20px;font-weight:600;color:#f0c06a;font-variant-numeric:tabular-nums}
+.add-row{display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap}
+.add-row label{font-size:13px;color:#7a8a9e}
+.add-row input[type=time]{background:#141d2e;color:#dce6f2;border:1px solid #2a3650;border-radius:8px;padding:9px 12px;font-size:15px;font-variant-numeric:tabular-nums;outline:none}
+.add-row input[type=time]:focus{border-color:#6ea8f5;box-shadow:0 0 0 3px rgba(110,168,245,.15)}
+.add-row .add-btn{background:#24344e;color:#cfe0ff;border:1px solid #3a4d6e;border-radius:8px;padding:9px 16px;font-size:14px;cursor:pointer}
+.add-row .add-btn:hover{background:#2d4162}
+.dial-wrap{display:flex;justify-content:center;margin:20px 0 30px;position:relative}
+.dial{width:280px;height:280px;position:relative}
+.dial svg{width:100%;height:100%;display:block}
+.dial-face{fill:#11192b;stroke:#2c3a54;stroke-width:2}
+.dial-ring{fill:none;stroke:#33435f;stroke-width:1}
+.tick{stroke:#5a6c88;stroke-width:1.5;stroke-linecap:round}
+.tick-major{stroke:#9fb0c9;stroke-width:2.5}
+.hand{fill:none;stroke-linecap:round}
+.hand-hour{stroke:#cfe0ff;stroke-width:5}
+.hand-minute{stroke:#cfe0ff;stroke-width:3}
+.hand-second{stroke:#f0c06a;stroke-width:1.5}
+.center-dot{fill:#f0c06a}
+.dragonfly{position:absolute;right:-18px;top:18%;width:96px;height:96px;transform:rotate(-18deg)}
+.dragonfly svg{width:100%;height:100%}
+.body{fill:#2a5f4a;stroke:#3a7a5c;stroke-width:.6}
+.head{fill:#3a7a5c}
+.wing{fill:rgba(140,210,255,.38);stroke:rgba(190,235,255,.65);stroke-width:.5}
+.wing-back{fill:rgba(140,210,255,.22);stroke:rgba(190,235,255,.45);stroke-width:.5}
+.wing-vein{stroke:rgba(220,245,255,.55);stroke-width:.4;fill:none}
+.wing-f{transform-origin:52px 50px;animation:flapF .35s ease-in-out infinite}
+.wing-fb{transform-origin:52px 50px;animation:flapFb .35s ease-in-out infinite}
+@keyframes flapF{0%,100%{transform:rotate(0)scaleY(1)}50%{transform:rotate(-14deg)scaleY(1.06)}}
+@keyframes flapFb{0%,100%{transform:rotate(0)scaleY(1)}50%{transform:rotate(10deg)scaleY(.94)}}
+.controls{display:flex;justify-content:center;gap:18px;margin-bottom:24px}
+.btn{padding:13px 26px;border-radius:12px;font-size:15px;cursor:pointer;border:1px solid transparent}
+.btn-snooze{background:#1e3a2e;color:#b9e6c8;border-color:#2e5a44}
+.btn-snooze:hover{background:#274e3a}
+.btn-close{background:#3a1d22;color:#f2b3b8;border-color:#5a2a33}
+.btn-close:hover{background:#4e242e}
+</style>
+</head>
+<body>
+<div class="app">
+  <p class="hint">快捷键：<kbd>空格</kbd> 贪睡 5 分钟 · <kbd>Esc</kbd> 关闭</p>
+  <div class="top">
+    <div class="clock">
+      <div class="date">MONDAY · 06:00</div>
+      <div class="time">06:00</div>
+    </div>
+    <div class="alarm-list">
+      <h2>闹钟</h2>
+      <div class="alarm-item"><span class="label">起床</span><span class="time">06:00</span></div>
+      <div class="alarm-item"><span class="label">会议</span><span class="time">09:30</span></div>
+    </div>
+  </div>
+  <div class="add-row">
+    <label for="timeInput">添加闹钟</label>
+    <input type="time" id="timeInput" value="07:00">
+    <button class="add-btn">添加</button>
+  </div>
+  <div class="dial-wrap">
+    <div class="dial">
+      <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+        <circle class="dial-face" cx="100" cy="100" r="95"/>
+        <circle class="dial-ring" cx="100" cy="100" r="88"/>
+        <g class="ticks">
+          <line class="tick tick-major" x1="100" y1="18" x2="100" y2="30"/>
+          <line class="tick" x1="114" y1="22" x2="118" y2="29"/>
+          <line class="tick" x1="128" y1="27" x2="133" y2="34"/>
+          <line class="tick" x1="138" y1="38" x2="143" y2="46"/>
+          <line class="tick" x1="143" y1="50" x2="149" y2="57"/>
+          <line class="tick" x1="149" y1="62" x2="153" y2="70"/>
+          <line class="tick" x1="153" y1="75" x2="157" y2="83"/>
+          <line class="tick" x1="157" y1="88" x2="160" y2="95"/>
+          <line class="tick" x1="157" y1="102" x2="160" y2="109"/>
+          <line class="tick" x1="153" y1="115" x2="157" y2="123"/>
+          <line class="tick" x1="149" y1="128" x2="153" y2="136"/>
+          <line class="tick" x1="143" y1="140" x2="148" y2="148"/>
+          <line class="tick" x1="133" y1="151" x2="138" y2="158"/>
+          <line class="tick" x1="128" y1="162" x2="133" y2="169"/>
+          <line class="tick" x1="114" y1="166" x2="118" y2="173"/>
+          <line class="tick" x1="86" y1="166" x2="82" y2="173"/>
+          <line class="tick" x1="72" y1="162" x2="67" y2="169"/>
+          <line class="tick" x1="62" y1="151" x2="57" y2="158"/>
+          <line class="tick" x1="52" y1="140" x2="47" y2="148"/>
+          <line class="tick" x1="47" y1="128" x2="43" y2="136"/>
+          <line class="tick" x1="43" y1="115" x2="39" y2="123"/>
+          <line class="tick" x1="43" y1="102" x2="40" y2="109"/>
+          <line class="tick" x1="43" y1="88" x2="40" y2="95"/>
+          <line class="tick" x1="47" y1="75" x2="43" y2="67"/>
+          <line class="tick" x1="52" y1="62" x2="47" y2="54"/>
+          <line class="tick" x1="62" y1="50" x2="57" y2="42"/>
+          <line class="tick" x1="72" y1="38" x2="77" y2="30"/>
+          <line class="tick" x1="86" y1="34" x2="90" y2="27"/>
+        </g>
+        <line class="hand hand-hour" x1="100" y1="100" x2="100" y2="55"/>
+        <line class="hand hand-minute" x1="100" y1="100" x2="100" y2="32"/>
+        <line class="hand hand-second" x1="100" y1="100" x2="100" y2="24"/>
+        <circle class="center-dot" cx="100" cy="100" r="4"/>
+      </svg>
+      <div class="dragonfly">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <ellipse class="wing wing-f" cx="35" cy="42" rx="22" ry="14" transform="rotate(-20 35 42)"/>
+          <ellipse class="wing wing-fb" cx="35" cy="42" rx="22" ry="14" transform="rotate(20 35 42)"/>
+          <ellipse class="wing-back" cx="35" cy="58" rx="16" ry="10" transform="rotate(-10 35 58)"/>
+          <ellipse class="wing-back" cx="35" cy="58" rx="16" ry="10" transform="rotate(10 35 58)"/>
+          <path class="wing-vein" d="M35 42 L15 35 M35 42 L55 35 M35 42 L20 50 M35 42 L50 50"/>
+          <path class="wing-vein" d="M35 58 L22 54 M35 58 L48 54"/>
+          <ellipse class="body" cx="52" cy="50" rx="3" ry="18" transform="rotate(-18 52 50)"/>
+          <circle class="head" cx="68" cy="40" r="7"/>
+          <circle cx="65" cy="38" r="1.5" fill="#fff"/>
+          <circle cx="70" cy="41" r="1.5" fill="#fff"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-snooze">贪睡 5 分钟</button>
+    <button class="btn btn-close">关闭</button>
+  </div>
+</div>
+<script>
+(function(){
+  var H=document.querySelector('.hand-hour'),M=document.querySelector('.hand-minute'),S=document.querySelector('.hand-second');
+  var dEl=document.querySelector('.date'),tEl=document.querySelector('.time');
+  var fly=document.querySelector('.dragonfly'),listEl=document.querySelector('.alarm-list');
+  var addBtn=document.querySelector('.add-btn'),inp=document.getElementById('timeInput');
+  var snoozeBtn=document.querySelector('.btn-snooze'),closeBtn=document.querySelector('.btn-close');
+  var KEY='dragonfly_alarms',alarms=[],ringing=false,ringingAlarm=null,ctx=null,nodes=[],orbit=0,orbitI=null,flap=0,flapI=null,flashI=null,flashOn=false;
+  var DAYS=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  function pad(n){return n<10?'0'+n:''+n;}
+  function render(){
+    var it=listEl.querySelectorAll('.alarm-item');
+    for(var i=0;i<it.length;i++)it[i].remove();
+    if(!alarms.length){var e=document.createElement('div');e.className='alarm-item';e.innerHTML='<span class="label">暂无闹钟</span>';listEl.appendChild(e);return;}
+    alarms.forEach(function(a,i){
+      var d=document.createElement('div');d.className='alarm-item';
+      var l=document.createElement('span');l.className='label';l.textContent=a.label;
+      var s=document.createElement('span');s.className='time';s.textContent=a.time;
+      var b=document.createElement('button');b.textContent='✕';b.style.cssText='background:none;border:0;color:#7a8a9e;font-size:16px;cursor:pointer;padding:0 4px;';
+      b.onclick=function(){alarms.splice(i,1);save();render();};
+      d.appendChild(l);d.appendChild(s);d.appendChild(b);listEl.appendChild(d);
+    });
+  }
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(alarms));}catch(e){}}
+  function load(){try{var d=JSON.parse(localStorage.getItem(KEY)||'[]');alarms=d||[];}catch(e){alarms=[];}}
+  function startSound(){
+    if(!ctx)ctx=new (window.AudioContext||window.webkitAudioContext)();
+    var m=ctx.createGain();m.gain.value=0;m.connect(ctx.destination);nodes.push(m);
+    var o1=ctx.createOscillator();o1.type='sine';o1.frequency.value=880;o1.connect(m);
+    var o2=ctx.createOscillator();o2.type='square';o2.frequency.value=440;o2.connect(m);
+    o1.start();o2.start();
+    var t=ctx.currentTime;
+    m.gain.linearRampToValueAtTime(0.05,t+0.1);
+    m.gain.linearRampToValueAtTime(0.35,t+0.8);
+    m.gain.linearRampToValueAtTime(0.5,t+2);
+  }
+  function stopSound(){
+    nodes.forEach(function(n){try{n.stop();}catch(e){}});
+    nodes=[];
+  }
+  function setFlap(on){
+    fly.style.animation=on?'flap .12s ease-in-out infinite':'none';
+  }
+  function orbitStep(){
+    orbit=(orbit+36)%360;
+    fly.style.transform='rotate('+orbit+'deg)';
+  }
+  function flashOn(){
+    flashOn=true;
+    if(!flashI)flashI=setInterval(function(){
+      document.body.style.transition='box-shadow 0.15s';
+      document.body.style.boxShadow=flashOn?'0 0 60px rgba(255,180,80,0.8)':'none';
+      flashOn=!flashOn;
+    },200);
+  }
+  function flashOff(){
+    flashOn=false;
+    if(flashI){clearInterval(flashI);flashI=null;}
+    document.body.style.boxShadow='none';
+  }
+  function triggerAlarm(a){
+    ringing=true;ringingAlarm=a;
+    startSound();
+    setFlap(true);
+    orbitI=setInterval(orbitStep,30);
+    flashOn();
+  }
+  function closeAlarm(){
+    ringing=false;ringingAlarm=null;
+    stopSound();
+    setFlap(false);
+    if(orbitI){clearInterval(orbitI);orbitI=null;}
+    flashOff();
+  }
+  function snoozeAlarm(){
+    closeAlarm();
+    var h=parseInt(ringingAlarm.time.slice(0,2),10),m=parseInt(ringingAlarm.time.slice(3),10);
+    m+=5;
+    if(m>=60){m-=60;h=(h+1)%24;}
+    alarms.push({time:pad(h)+':'+pad(m),label:ringingAlarm.label});
+    save();render();
+  }
+  function tick(){
+    var n=new Date();
+    var h=n.getHours(),mi=n.getMinutes(),s=n.getSeconds();
+    tEl.textContent=pad(h)+':'+pad(mi);
+    dEl.textContent=DAYS[n.getDay()]+' · '+pad(h)+':'+pad(mi);
+    var hs=(h%12)*30+mi*0.5;
+    var ms=mi*6+s*0.1;
+    var ss=s*6;
+    H.style.transform='rotate('+hs+'deg)';
+    M.style.transform='rotate('+ms+'deg)';
+    S.style.transform='rotate('+ss+'deg)';
+    [H,M,S].forEach(function(el){el.style.transformOrigin='100px 100px';});
+    if(!flapI){
+      flapI=setInterval(function(){
+        flap=(flap+1)%2;
+        fly.style.transform=fly.style.animation?'':'rotate(0deg)';
+      },500);
+    }
+    if(!ringing){
+      alarms.forEach(function(a,i){
+        var ah=parseInt(a.time.slice(0,2),10),am=parseInt(a.time.slice(3),10);
+        if(ah===h&&am===mi){
+          if(!ringing){
+            triggerAlarm(a);
+            alarms.splice(i,1);
+            save();
+            render();
+          }
+        }
+      });
+    }
+  }
+  addBtn.onclick=function(){
+    var v=inp.value;
+    if(v){alarms.push({time:v,label:'Alarm '+(alarms.length+1)});save();render();inp.value='';}
+  };
+  snoozeBtn.onclick=snoozeAlarm;
+  closeBtn.onclick=closeAlarm;
+  document.addEventListener('keydown',function(e){
+    if(e.code==='Escape')closeAlarm();
+    else if(e.code==='Space'){e.preventDefault();snoozeAlarm();}
+  });
+  load();
+  render();
+  tick();
+  setInterval(tick,1000);
+})();
+</script>
+</body>
+</html>
