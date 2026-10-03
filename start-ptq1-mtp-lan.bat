@@ -103,8 +103,8 @@ echo.
   --host 0.0.0.0 --port 8095 --model-id qwen3.8-27b --api-key "%KEY%" ^
   --stats-port %STATSPORT% --request-log-jsonl "%REQLOG%" ^
   --max-context 262144 --kv-capacity 8192 --kv-dtype k8v4 --host-kv-mib 16384 ^
-  --prefill-chunk 1024 --spec mtp --draft-tokens 4 --no-cuda-graph ^
-  --default-max-tokens 4096 --default-reasoning-effort none --max-concurrency 1 ^
+  --spec mtp --draft-tokens 4 --no-cuda-graph ^
+  --default-max-tokens 4096 --default-reasoning-effort none ^
   --max-shared-prefixes 0 ^
   --presence-penalty 0 --temperature 0.7 --top-p 0.9 --top-k 20
 

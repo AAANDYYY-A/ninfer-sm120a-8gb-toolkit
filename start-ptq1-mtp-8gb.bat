@@ -27,7 +27,7 @@ REM   README-聊天怎么用.md. Do not re-add NINFER_WEBUI_DIR as a "fix": it d
 REM   nothing here and only makes the failure look like a configuration problem.
 REM
 REM  Why the sizing, quoting the engine's own numbers measured on THIS machine
-REM  (RTX 5060 8 GB, driver <驱动版本>, model bonsai2_27b_ternary_ptq1_native_mtp.ninfer
+REM  (RTX 5060 8 GB, driver 591.86, model bonsai2_27b_ternary_ptq1_native_mtp.ninfer
 REM   6,394,697,216 bytes, sha256 5C4486C8A52687E3F62072C7DD2A320546D0E00D1C019BF137EB02CC944E21B8):
 REM
 REM    shipped argv                    requires 1,863,978,752  available   817,598,464   FATAL
@@ -101,8 +101,8 @@ echo.
 "%ENGINE%" "%MODEL%" ^
   --host 127.0.0.1 --port 8095 --model-id qwen3.8-27b ^
   --max-context 262144 --kv-capacity 8192 --kv-dtype k8v4 --host-kv-mib 16384 ^
-  --prefill-chunk 1024 --spec mtp --draft-tokens 4 --no-cuda-graph ^
-  --default-max-tokens 4096 --default-reasoning-effort none --max-concurrency 1 ^
+  --spec mtp --draft-tokens 4 --no-cuda-graph ^
+  --default-max-tokens 4096 --default-reasoning-effort none ^
   --max-shared-prefixes 0 ^
   --presence-penalty 0 --temperature 0.7 --top-p 0.9 --top-k 20
 

@@ -12,3 +12,4 @@ logs/
 agent-work/
 agent-run.jsonl
 *demo*.log
+kvdisk/
